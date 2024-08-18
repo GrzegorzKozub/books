@@ -1,30 +1,33 @@
 #!/usr/bin/env zsh
 
+[[ $(pacman -Qs html-xml-utils) ]] || sudo pacman -S --noconfirm html-xml-utils
 [[ $(pacman -Qs kepubify-bin) ]] || paru -S --aur --noconfirm kepubify-bin
 
-for BOOK in $(
-  curl --silent https://dieterplex.github.io/rust-ebookshelf/ |
-    grep -e '[^"]*.epub' --only-matching
-  )
-do
+URL='https://dieterplex.github.io/rust-ebookshelf/'
+KOBO="/run/media/$USER/KOBOeReader"
 
-  # URI=$(echo $BOOK | jq --raw-input --raw-output '@uri')
-  curl --silent \
-    "https://dieterplex.github.io/rust-ebookshelf/$BOOK" \
-    > "$BOOK"
+HTML=$(curl --silent $URL | hxnormalize -x -l 256)
+BOOKS=$(
+  echo $HTML |
+    hxselect -s '\n' -c 'tbody tr td:nth-child(2)' |
+    sed 's/ <.*//')
+# LINKS=$(
+#   echo $HTML |
+#     hxselect -s '\n' -c 'tbody tr td:nth-child(3)' | 
+#     sed 's/[^"]*"//' | sed 's/.epub.*//')
 
-  # kepubify \
-  #   --inplace "$BOOK" \
-  #   --css 'code { font-family: Cascadia Code; }' \
-  #   > /dev/null
-  #
-  # cp "$BOOK.kepub.epub" /run/media/$USER/KOBOeReader
-  # rm "$BOOK"
+echo $BOOKS | while read -r BOOK; do
+
+  LINK=$(echo $BOOK | jq --raw-input --raw-output '@uri')
+  curl --silent "$URL$LINK.epub" > "$BOOK.epub"
+
+  kepubify \
+    --inplace "$BOOK.epub" \
+    --css 'code { font-family: Cascadia Code; }' \
+    > /dev/null
+  rm "$BOOK.epub"
+  
+  [[ -d $KOBO ]] && cp "$BOOK.kepub.epub" $KOBO 
 
 done
-
-
-# curl --silent https://dieterplex.github.io/rust-ebookshelf/ | grep -e '[^<td>][^<]*<a'
-#curl --silent https://dieterplex.github.io/rust-ebookshelf/ | grep -e 'epub' | sed 's/<tr><td>[0-9]*<\/td><td>//'
-#curl --silent https://dieterplex.github.io/rust-ebookshelf/ | hxnormalize -x | hxselect -c 'tbody tr td:nth-child(2):nth-child(2)' -s '\n'
 
