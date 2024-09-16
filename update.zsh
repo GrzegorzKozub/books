@@ -24,9 +24,9 @@ echo $BOOKS | while read -r BOOK; do
   kepubify \
     --inplace "$BOOK.epub" \
     --css 'html { font-family: Georgia !important; font-size: 16px; }' \
-    --css 'code, p code, pre code, ul li code { font-family: Cascadia Code !important; font-size: 15px; }' \
+    --css 'code, p code, pre code, ul li code { color: #111 !important; font-family: Cascadia Code !important; font-size: 15px; }' \
     --css 'h1 code, h2 code, h3 code, h4 code, h5 code, h6 code { font-size: 1em; }' \
-    --css 'span.caption { font-weight: normal; }' \
+    --css 'span.caption, span.caption code { color: #444 !important; font-weight: normal; }' \
     > /dev/null
   rm "$BOOK.epub"
 
