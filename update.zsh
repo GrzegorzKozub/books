@@ -18,8 +18,29 @@ BOOKS=$(
 
 echo $BOOKS | while read -r BOOK; do
 
+  if [[ 
+    $BOOK == 'CXX Documentation' ||
+    $BOOK == 'CXX-Qt Documentation' ||
+    $BOOK == 'FLTK-rs Book' ]]; then
+    echo "skip $BOOK"
+    continue
+  else
+    echo "process $BOOK"
+  fi
+
   LINK=$(echo $BOOK | jq --raw-input --raw-output '@uri')
   curl --silent "$URL$LINK.epub" > "$BOOK.epub"
+
+  7z x "$BOOK.epub" -o"$BOOK" > /dev/null
+  pushd "$BOOK"
+  fd --type=file --extension=html |
+    xargs --delimiter='\n' sed -i '/^\s*\/\/ --snip--/d'
+  fd --type=file --extension=html |
+    xargs --delimiter='\n' sed -i -E "s/#\s+(.*)$/<span class='boring'>\1<\/span>/"
+  7z a -tzip "$BOOK.epub" * > /dev/null
+  mv "$BOOK.epub" ..
+  popd
+  rm -rf "$BOOK"
 
   kepubify \
     --inplace "$BOOK.epub" \
@@ -30,6 +51,7 @@ echo $BOOKS | while read -r BOOK; do
     --css 'h1 code span, h2 code span, h3 code span, h4 code span, h5 code span, h6 code span { font-family: Georgia; }' \
     --css 'span.caption { color: #404040; font-weight: normal; }' \
     --css 'a span { color: #404040; }' \
+    --css 'span.boring { color: #808080; }' \
     > /dev/null
   rm "$BOOK.epub"
 
