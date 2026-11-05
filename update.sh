@@ -21,7 +21,7 @@ BOOKS=$(
 
 echo "$BOOKS" | while read -r BOOK; do
 
-  if [[ 
+  if [[
     $BOOK == 'CXX Documentation' ||
     $BOOK == 'CXX-Qt Documentation' ||
     $BOOK == 'FLTK-rs Book' ]]; then
