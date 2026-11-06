@@ -21,7 +21,7 @@ BOOKS=$(
 
 echo "$BOOKS" | while read -r BOOK; do
 
-  if [[
+  if [[ 
     $BOOK == 'CXX Documentation' ||
     $BOOK == 'CXX-Qt Documentation' ||
     $BOOK == 'FLTK-rs Book' ]]; then
@@ -32,17 +32,17 @@ echo "$BOOKS" | while read -r BOOK; do
   fi
 
   LINK=$(echo "$BOOK" | jq --raw-input --raw-output '@uri')
-  curl --silent "$URL""$LINK".epub >"$BOOK".epub
+  curl --silent "$URL""$LINK".epub > "$BOOK".epub
 
-  7z x "$BOOK".epub -o"$BOOK" >/dev/null
-  pushd "$BOOK" >/dev/null
+  7z x "$BOOK".epub -o"$BOOK" > /dev/null
+  pushd "$BOOK" > /dev/null
   fd --type=file --extension=html |
     xargs --delimiter='\n' sed -i '/^\s*\/\/ --snip--/d'
   fd --type=file --extension=html |
     xargs --delimiter='\n' sed -i -E "s/#\s+(.*)$/<span class='boring'>\1<\/span>/"
-  7z a -tzip "$BOOK".epub -- * >/dev/null
+  7z a -tzip "$BOOK".epub -- * > /dev/null
   mv "$BOOK".epub ..
-  popd >/dev/null
+  popd > /dev/null
   rm -rf "$BOOK"
 
   kepubify \
@@ -55,7 +55,7 @@ echo "$BOOKS" | while read -r BOOK; do
     --css 'span.caption { color: #404040; font-weight: normal; }' \
     --css 'a span { color: #404040; }' \
     --css 'span.boring { color: #808080; }' \
-    >/dev/null
+    > /dev/null
   rm "$BOOK".epub
 
   [[ -d $KOBO ]] && cp "$BOOK".kepub.epub "$KOBO"
